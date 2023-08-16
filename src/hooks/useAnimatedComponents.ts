@@ -19,8 +19,10 @@ const useAnimatedComponents = () => {
   const headerTranslate = useRef(new Animated.ValueXY(INITIAL_POSITION));
   const footerTranslate = useRef(new Animated.ValueXY(INITIAL_POSITION));
 
-  const toggleVisible = (isVisible: boolean) => {
-    if (isVisible) {
+  const isVisible = useRef(true);
+
+  const setIsVisible = (shouldMakeVisible: boolean) => {
+    if (shouldMakeVisible) {
       Animated.parallel([
         Animated.timing(headerTranslate.current.y, {
           ...ANIMATION_CONFIG,
@@ -30,7 +32,7 @@ const useAnimatedComponents = () => {
           ...ANIMATION_CONFIG,
           toValue: 0,
         }),
-      ]).start();
+      ]).start(() => (isVisible.current = true));
     } else {
       Animated.parallel([
         Animated.timing(headerTranslate.current.y, {
@@ -41,14 +43,23 @@ const useAnimatedComponents = () => {
           ...ANIMATION_CONFIG,
           toValue: 300,
         }),
-      ]).start();
+      ]).start(() => (isVisible.current = false));
     }
+  };
+
+  const toggleIsVisible = () => {
+    setIsVisible(!isVisible.current);
   };
 
   const headerTransform = headerTranslate.current.getTranslateTransform();
   const footerTransform = footerTranslate.current.getTranslateTransform();
 
-  return [headerTransform, footerTransform, toggleVisible] as const;
+  return [
+    headerTransform,
+    footerTransform,
+    setIsVisible,
+    toggleIsVisible,
+  ] as const;
 };
 
 export default useAnimatedComponents;
